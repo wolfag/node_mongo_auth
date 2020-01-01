@@ -1,54 +1,55 @@
-const lodash = require ('lodash');
-const UserModel = require ('../models/users.model');
-const crypto = require ('crypto');
+const lodash = require('lodash');
+const UserModel = require('../models/users.model');
+const crypto = require('crypto');
 
 exports.insert = (req, res) => {
-  let salt = crypto.randomBytes (16).toString ('base64');
+  let salt = crypto.randomBytes(16).toString('base64');
   let hash = crypto
-    .createHmac ('sha512', salt)
-    .update (req.body.password)
-    .digest ('base64');
+    .createHmac('sha512', salt)
+    .update(req.body.password)
+    .digest('base64');
   req.body.password = `${salt}$${hash}`;
   req.body.permissionLevel = 1;
 
-  UserModel.createUser (req.body).then (result =>
-    res.status (201).send ({id: result._id})
+  UserModel.createUser(req.body).then((result) =>
+    res.status(201).send({ id: result._id })
   );
 };
 
 exports.list = (req, res) => {
-  const limit = parseInt (lodash.get (req, 'query.limit') || 10);
-  let page = lodash.get (req, 'query.page');
+  const limit = parseInt(lodash.get(req, 'query.limit') || 10);
+  let page = lodash.get(req, 'query.page');
   if (page) {
-    req.query.page = parseInt (page);
-    page = Number.isInteger (page) ? page : 0;
+    req.query.page = parseInt(page);
+    page = Number.isInteger(page) ? page : 0;
   }
-  UserModel.list (limit, page).then (result => res.status (200).send (result));
+  UserModel.list(limit, page).then((result) => res.status(200).send(result));
 };
 
 exports.getById = (req, res) => {
-  UserModel.findById (req.params.userId).then (result =>
-    res.status (200).send (result)
+  UserModel.findById(req.params.userId).then((result) =>
+    res.status(200).send(result)
   );
 };
 
 exports.pathById = (req, res) => {
-  const password = lodash.get (req, 'body.password');
+  const password = lodash.get(req, 'body.password');
   if (password) {
-    const salt = crypto.randomBytes (16).toString ('base64');
+    const salt = crypto.randomBytes(16).toString('base64');
     const hash = crypto
-      .createHmac ('sha512', salt)
-      .update (req.body.password)
-      .digest ('base64');
+      .createHmac('sha512', salt)
+      .update(req.body.password)
+      .digest('base64');
     req.body.password = `${salt}$${hash}`;
   }
-  UserModel.pathUser (req.params.userId, req.body).then (result =>
-    res.status (204).send ({})
+  UserModel.pathUser(req.params.userId, req.body).then((result) =>
+    res.status(204).send({})
   );
 };
 
 exports.removeById = (req, res) => {
-  UserModel.removeById (req.params.userId).then (result =>
-    res.status (204).send ({})
+  console.log({ req: req.params });
+  UserModel.removeById(req.params.userId).then((result) =>
+    res.status(204).send({})
   );
 };
